@@ -6,12 +6,14 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/26 17:10:16 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/07/26 21:17:34 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/07/30 21:03:22 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #ifndef IOPERAND_HPP
 # define IOPERAND_HPP
+
+# include <string>
 
 enum	eOperandType {
 	Int8,

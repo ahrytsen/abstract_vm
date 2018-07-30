@@ -5,8 +5,8 @@
 //                                                    +:+ +:+         +:+     //
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2018/07/26 17:45:34 by ahrytsen          #+#    #+#             //
-
+//   Created: 2018/07/30 13:19:05 by ahrytsen          #+#    #+#             //
+//   Updated: 2018/07/30 14:00:04 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -38,19 +38,16 @@ public:
 };
 
 template <class T>
-TOperand<T>::TOperand() : _value(0), _precision(0) {}
+TOperand<T>::TOperand( void ) : _value(0), _precision(0) {}
 
 template <class T>
-TOperand<T>::TOperand(std::string value) {
-
-}
+TOperand<T>::TOperand(T value,  int precision, eOperandType type)
+	: _value(value), _precision(precision), _type(type) {}
 
 template <class T>
 int						TOperand<T>::getPrecision( void ) const {return _precision;}
 
 template <class T>
-eOperandType			TOperand<T>::getType( void ) const {
-
-}
+eOperandType			TOperand<T>::getType( void ) const {return _type;}
 
 # endif
