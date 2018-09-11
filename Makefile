@@ -6,7 +6,7 @@
 #    By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/07/26 17:26:54 by ahrytsen          #+#    #+#              #
-#    Updated: 2018/07/26 17:40:49 by ahrytsen         ###   ########.fr        #
+#    Updated: 2018/09/11 15:56:30 by ahrytsen         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -16,11 +16,14 @@ DIROBJ		=	./obj/
 INCLUDE		=	-I./inc/
 INC_LIB		=
 
-SRC			=	main.c
+SRC			=	main.cpp\
+				OFactory.cpp
 
-HDRS		=	inc/IOperand.hpp
+HDRS		=	inc/IOperand.hpp\
+				inc/TOperand.hpp\
+				inc/OFactory.hpp
 
-OBJ			=	$(addprefix $(DIROBJ), $(SRC:.c=.o))
+OBJ			=	$(addprefix $(DIROBJ), $(SRC:.cpp=.o))
 
 ifdef FLAGS
 	ifeq ($(FLAGS), no)
@@ -30,7 +33,7 @@ CFLAGS		=
 CFLAGS		=	-Wall -Wextra -Werror -g
 	endif
 else
-CFLAGS		=	-Wall -Wextra -Werror
+CFLAGS		=	-Wall -Wextra -Werror -Wc++11-extensions -Wc++14-extensions
 endif
 
 CC			=	clang++
@@ -58,5 +61,5 @@ re		:		fclean all
 $(DIROBJ):
 				@mkdir -p $(DIROBJ)
 
-$(OBJ)	:		$(DIROBJ)%.o : $(DIRSRC)%.c $(HDRS)
+$(OBJ)	:		$(DIROBJ)%.o : $(DIRSRC)%.cpp $(HDRS)
 				@$(CC) $(INCLUDE) $(CFLAGS) -o $@ -c $<
