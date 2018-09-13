@@ -6,7 +6,7 @@
 #    By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/07/26 17:26:54 by ahrytsen          #+#    #+#              #
-#    Updated: 2018/09/11 15:56:30 by ahrytsen         ###   ########.fr        #
+#    Updated: 2018/09/13 21:55:10 by ahrytsen         ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -17,23 +17,25 @@ INCLUDE		=	-I./inc/
 INC_LIB		=
 
 SRC			=	main.cpp\
-				OFactory.cpp
+				OFactory.cpp\
+				AVM.cpp
 
 HDRS		=	inc/IOperand.hpp\
 				inc/TOperand.hpp\
-				inc/OFactory.hpp
+				inc/OFactory.hpp\
+				inc/AVM.hpp
 
 OBJ			=	$(addprefix $(DIROBJ), $(SRC:.cpp=.o))
 
 ifdef FLAGS
 	ifeq ($(FLAGS), no)
-CFLAGS		=
+CFLAGS		=	-std=c++11
 	endif
 	ifeq ($(FLAGS), debug)
-CFLAGS		=	-Wall -Wextra -Werror -g
+CFLAGS		=	-Wall -Wextra -Werror -g -std=c++11
 	endif
 else
-CFLAGS		=	-Wall -Wextra -Werror -Wc++11-extensions -Wc++14-extensions
+CFLAGS		=	-Wall -Wextra -Werror -std=c++11
 endif
 
 CC			=	clang++

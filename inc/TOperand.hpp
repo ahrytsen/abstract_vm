@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:19:05 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/07/30 14:00:04 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/13 22:05:36 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,7 @@
 # include <iostream>
 # include <IOperand.hpp>
 # include <OFactory.hpp>
-//class	OFactory;
+
 template<class T>
 class	TOperand : public IOperand {
 	T						_value;
@@ -216,6 +216,7 @@ IOperand const *		TOperand<T>::operator%( const IOperand & rhs ) const {
 	case _Float:
 	case _Double:
 	default:
+		throw std::logic_error("Modulo of float type");
 		return (NULL);
 	}
 }
