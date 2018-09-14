@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/27 03:18:45 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/13 17:37:16 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/14 20:19:41 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,14 +22,16 @@ int		main(int ac, char **av)
 	if (ac < 2)
 	{
 		abstract_vm = new AVM();
-		st = abstract_vm->run();
+		try {st = abstract_vm->run();}
+		catch (std::exception & e) { std::cout << e.what() << std::endl;}
 		delete abstract_vm;
 		return (st);
 	}
 	for (int i = 1; i < ac; i++)
 	{
 		abstract_vm = new AVM(av[i]);
-		abstract_vm->run();
+		try {abstract_vm->run();}
+		catch (std::exception & e) { std::cout << e.what() << std::endl;}
 		delete abstract_vm;
 	}
 }

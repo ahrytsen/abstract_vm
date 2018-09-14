@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/12 17:00:56 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/13 22:00:29 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/14 21:10:42 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -44,6 +44,7 @@ AVM::AVM( std::string file_path ) : _interactive(false) {
 int		AVM::run( void ) {
 	for (std::string line : _lines)
 		std::cout << line << std::endl;
+	_factory.createOperand(Int16, "2334534345345345345345345");
 	return (0);
 }
 

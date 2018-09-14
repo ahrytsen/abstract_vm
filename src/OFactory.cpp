@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/11 15:38:27 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/13 21:01:22 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/14 21:10:05 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -35,7 +35,9 @@ IOperand const *	OFactory::createInt8( std::string const & value ) const {
 }
 
 IOperand const *	OFactory::createInt16( std::string const & value ) const {
-	int32_t res = std::stoi(value);
+	int32_t res;
+	try {res = std::stoi(value);}
+	catch (...) {throw std::out_of_range("overflov Int16");}
 	if (res < std::numeric_limits<int16_t>::min()
 		|| res > std::numeric_limits<int16_t>::max())
 		throw std::out_of_range("overflov Int16");
