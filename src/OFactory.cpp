@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/11 15:38:27 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/14 21:10:05 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/15 03:06:39 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,35 +27,43 @@ OFactory &			OFactory::operator=( OFactory const & f ) {
 OFactory::~OFactory() {}
 
 IOperand const *	OFactory::createInt8( std::string const & value ) const {
-	int32_t res = std::stoi(value);
+	int32_t res;
+	try { res = std::stoi(value); }
+	catch (...) { throw std::out_of_range("Value ``" + value + "\" overflows Int8"); }
 	if (res < std::numeric_limits<int8_t>::min()
 		|| res > std::numeric_limits<int8_t>::max())
-		throw std::out_of_range("overflov Int8");
+		throw std::out_of_range("Value ``" + value + "\" overflows Int8");
 	return ( new TOperand<int8_t>(res, Int8) );
 }
 
 IOperand const *	OFactory::createInt16( std::string const & value ) const {
 	int32_t res;
-	try {res = std::stoi(value);}
-	catch (...) {throw std::out_of_range("overflov Int16");}
+	try { res = std::stoi(value); }
+	catch (...) { throw std::out_of_range("Value ``" + value + "\" overflows Int16"); }
 	if (res < std::numeric_limits<int16_t>::min()
 		|| res > std::numeric_limits<int16_t>::max())
-		throw std::out_of_range("overflov Int16");
+		throw std::out_of_range("Value ``" + value + "\" overflows Int16");
 	return ( new TOperand<int16_t>(res, Int16) );
 }
 
 IOperand const *	OFactory::createInt32( std::string const & value ) const {
-	int32_t res = std::stoi(value);
+	int32_t res;
+	try { res = std::stoi(value); }
+	catch (...) { throw std::out_of_range("Value ``" + value + "\" overflows Int32"); }
 	return ( new TOperand<int32_t>(res, Int32) );
 }
 
 IOperand const *	OFactory::createFloat( std::string const & value ) const {
-	float res = std::stof(value);
+	float res;
+	try { res = std::stof(value); }
+	catch (...) { throw std::out_of_range("Value ``" + value + "\" overflows Float"); }
 	return ( new TOperand<float>(res, _Float) );
 }
 
 IOperand const *	OFactory::createDouble( std::string const & value ) const {
-	double res = std::stod(value);
+	double res;
+	try { res = std::stod(value); }
+	catch (...) { throw std::out_of_range("Value ``" + value + "\" overflows Double"); }
 	return ( new TOperand<double>(res, _Double) );
 }
 
