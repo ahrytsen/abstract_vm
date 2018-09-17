@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:19:05 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/13 22:05:36 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/17 20:09:25 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,6 +41,12 @@ public:
 
 	virtual ~TOperand( void ) {};
 };
+
+template<class T>
+std::ostream &	operator<<( std::ostream & out, TOperand<T> const & op ) {
+	out << op._value;
+	return (out);
+}
 
 template<class T>
 const OFactory &	TOperand<T>::_factory = OFactory::getInstance();
