@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/11 14:50:37 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/11 21:06:38 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/19 19:13:19 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,6 +15,7 @@
 
 # include <iostream>
 # include <vector>
+# include <regex>
 # include <IOperand.hpp>
 
 class OFactory;

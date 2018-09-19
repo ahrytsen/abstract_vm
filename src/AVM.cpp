@@ -6,18 +6,19 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/12 17:00:56 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/17 20:43:35 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/19 21:07:43 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <AVM.hpp>
 
-const OFactory &	AVM::_factory = OFactory::getInstance();
-const AVM::cmdMap	AVM::_cmdmap = AVM::init_cmdmap();
-const AVM::tpMap	AVM::_typemap = AVM::init_typemap();
+const OFactory &		AVM::_factory = OFactory::getInstance();
+const AVM::smpl_cmdMap	AVM::_smpl_cmdmap = AVM::init_smpl_cmdmap();
+const AVM::arg_cmdMap	AVM::_arg_cmdmap = AVM::init_arg_cmdmap();
+const AVM::tpMap		AVM::_typemap = AVM::init_typemap();
 
-const AVM::cmdMap	AVM::init_cmdmap(void) {
-	AVM::cmdMap	map;
+const AVM::smpl_cmdMap	AVM::init_smpl_cmdmap(void) {
+	AVM::smpl_cmdMap	map;
 
 	map["pop"] = &AVM::pop;
 	map["dump"] = &AVM::dump;
@@ -27,12 +28,19 @@ const AVM::cmdMap	AVM::init_cmdmap(void) {
 	map["div"] = &AVM::div;
 	map["mod"] = &AVM::mod;
 	map["print"] = &AVM::print;
-	map["push"] = reinterpret_cast<void (AVM::*)()>(&AVM::push);
-	map["assert"] = reinterpret_cast<void (AVM::*)()>(&AVM::assert);
+	map["exit"] = &AVM::ft_exit;
 	return map;
 }
 
-const AVM::tpMap	AVM::init_typemap(void) {
+const AVM::arg_cmdMap	AVM::init_arg_cmdmap(void) {
+	AVM::arg_cmdMap	map;
+
+	map["push"] = &AVM::push;
+	map["assert"] = &AVM::ft_assert;
+	return map;
+}
+
+const AVM::tpMap		AVM::init_typemap(void) {
 	AVM::tpMap	map;
 
 	map["int8"] = Int8;
@@ -43,20 +51,20 @@ const AVM::tpMap	AVM::init_typemap(void) {
 	return map;
 }
 
-eOperandType	AVM::parse_type(std::string type) {
-	if (type == "int8") return Int8;
-	else if (type == "int16") return Int16;
-	else if (type == "int32") return Int32;
-	else if (type == "float") return _Float;
-	else if (type == "double") return _Double;
-	else throw std::invalid_argument(std::string("Unknown type: ") + type + '!');
+eOperandType			AVM::parse_type(std::string type) {
+	const auto & got =  _typemap.find(type);
+	if (got != _typemap.end()) return got->second;
+	else throw std::invalid_argument(std::string("Unknown type: ``")
+									 + type + "\"!");
 }
 
-void	AVM::readlines(std::istream & input) {
+void					AVM::readlines(std::istream & input) {
+	int			line_nbr = 0;
 	std::string	tmp;
 
 	while (input.good() && !input.eof())
 	{
+		if (_from_tty) std::cout << ++line_nbr << ": ";
 		std::getline(input, tmp);
 		if (std::regex_match(tmp, std::regex("^\\s*;;.*$")))
 			break ;
@@ -66,8 +74,9 @@ void	AVM::readlines(std::istream & input) {
 }
 
 void	AVM::pop(void) {
-	if (_stack.empty())
-		throw std::underflow_error("Pop omn empty stack!");
+	if (_stack.size() < 1)
+		throw std::underflow_error("pop: Empty stack!");
+	std::unique_ptr< const IOperand >(_stack.back());
 	_stack.pop_back();
 }
 
@@ -77,64 +86,117 @@ void	AVM::dump(void) {
 }
 
 void	AVM::add(void) {
-
+	if (_stack.size() < 2)
+		throw std::logic_error("add: Less then two operands on the stack!");
+	std::unique_ptr< const IOperand > op2(_stack.back());
+	_stack.pop_back();
+	std::unique_ptr< const IOperand > op1(_stack.back());
+	_stack.pop_back();
+	_stack.push_back(*op1 + *op2);
 }
 
 void	AVM::sub(void) {
-
+	if (_stack.size() < 2)
+		throw std::logic_error("sub: Less then two operands on the stack!");
+	std::unique_ptr< const IOperand > op2(_stack.back());
+	_stack.pop_back();
+	std::unique_ptr< const IOperand > op1(_stack.back());
+	_stack.pop_back();
+	_stack.push_back(*op1 - *op2);
 }
 
 void	AVM::mul(void) {
-
+	if (_stack.size() < 2)
+		throw std::logic_error("mul: Less then two operands on the stack!");
+	std::unique_ptr< const IOperand > op2(_stack.back());
+	_stack.pop_back();
+	std::unique_ptr< const IOperand > op1(_stack.back());
+	_stack.pop_back();
+	_stack.push_back(*op1 * *op2);
 }
 
 void	AVM::div(void) {
-
+	if (_stack.size() < 2)
+		throw std::logic_error("div: Less then two operands on the stack!");
+	std::unique_ptr< const IOperand > op2(_stack.back());
+	_stack.pop_back();
+	std::unique_ptr< const IOperand > op1(_stack.back());
+	_stack.pop_back();
+	_stack.push_back(*op1 / *op2);
 }
 
 void	AVM::mod(void) {
-
+	if (_stack.size() < 2)
+		throw std::logic_error("mod: Less then two operands on the stack!");
+	std::unique_ptr< const IOperand > op2(_stack.back());
+	_stack.pop_back();
+	std::unique_ptr< const IOperand > op1(_stack.back());
+	_stack.pop_back();
+	_stack.push_back(*op1 % *op2);
 }
 
 void	AVM::print(void) {
+	if (_stack.empty())
+		throw std::logic_error("print: Empty stack!");
+	if (_stack.back()->getType() != Int8)
+		throw std::logic_error("print: Can`t print operand of non int8 type!");
+	std::cout << dynamic_cast< const TOperand< int8_t > & >(*_stack.back()).getValue();
+}
 
+void	AVM::ft_exit(void) {
+	_exit = 1;
 }
 
 void	AVM::push(eOperandType type, std::string value) {
 	_stack.push_back(_factory.createOperand(type, value));
 }
 
-void	AVM::assert(eOperandType type, std::string value) {
-	(void)type;
-	(void)value;
-}
-
-void	AVM::exec_line(std::string cmd)
-{
-	if (cmd == "pop") return pop();
-	else if (cmd == "dump") return dump();
-	else if (cmd == "add") return add();
-	else if (cmd == "sub") return sub();
-	else if (cmd == "mul") return mul();
-	else if (cmd == "div") return div();
-	else if (cmd == "mod") return mod();
-	else if (cmd == "print") return print();
-	else if (cmd == "exit") exit(0);
-	else throw std::invalid_argument(std::string("Unknown instruction: ") + cmd + '!');
+void	AVM::ft_assert(eOperandType type, std::string value) {
+	std::unique_ptr< const IOperand >	ass(_factory.createOperand(type, value));
+	if (_stack.empty())
+		throw std::logic_error("assert: Empty stack!");
+	auto 								peak = _stack.back();
+	if (type != peak->getType())
+		throw std::logic_error("assert: Types differ!");
+	else if (ass->getPrecision() != peak->getPrecision())
+		throw std::logic_error("assert: Precision differ!");
+	else if (!(*peak == *ass))
+		throw std::logic_error("assert: Value differ!");
 }
 
 void	AVM::exec_line(std::string cmd, std::string type, std::string value)
 {
+	std::transform(cmd.begin(), cmd.end(),
+				   cmd.begin(), (int (*)(int))std::tolower);
+	std::transform(type.begin(), type.end(),
+				   type.begin(), (int (*)(int))std::tolower);
+	const auto	smpl_got = _smpl_cmdmap.find(cmd);
+	const auto	arg_got = _arg_cmdmap.find(cmd);
+	void	(AVM::*smpl_cmd)(void) = (smpl_got != _smpl_cmdmap.end()
+									  ? smpl_got->second : nullptr);
+	void	(AVM::*arg_cmd)(eOperandType, std::string) =
+		(arg_got != _arg_cmdmap.end() ? arg_got->second : nullptr);
+
 	if (cmd == "push") return push(parse_type(type), value);
-	else if (cmd == "assert") return assert(parse_type(type), value);
-	else throw std::invalid_argument(std::string("Unknown instruction: ") + cmd + '!');
+
+	if (!smpl_cmd && !arg_cmd)
+		throw std::invalid_argument(std::string("Unknown instruction: ``")
+									 + cmd + "\"!");
+	else if (smpl_cmd && type.size())
+		throw std::invalid_argument(std::string("Instruction ``") + cmd
+									+ "\" do not require an argument!");
+	else if (arg_cmd && !type.size())
+		throw std::invalid_argument(std::string("Instruction ``") + cmd
+									+ "\" require an argument!");
+	else if	(smpl_cmd) (this->*smpl_cmd)();
+	else (this->*arg_cmd)(parse_type(type), value);
 }
 
-AVM::AVM() : _exit(false) {
+AVM::AVM() : _from_tty(isatty(fileno(stdin))), _exit(false) {
 	readlines(std::cin);
 }
 
-AVM::AVM( std::string file_path ) : _exit(false) {
+AVM::AVM( std::string file_path ) : _from_tty(false), _exit(false) {
 	std::filebuf	file;
 	if (file.open(file_path, std::ios::in))
 	{
@@ -145,12 +207,12 @@ AVM::AVM( std::string file_path ) : _exit(false) {
 }
 
 int		AVM::run( void ) {
-	"^\s*([[:alpha:]]+)(\s+([[:alnum:]]+)\s*\(\s*([+|-]?[0-9]+(\.[0-9]+)?)\s*\))?\s*(;.*)?$"
-    std::regex	regex("^\\s*((pop|dump|add|sub|mul|div|mod|print|exit)"
-					  "|((push|assert)\\s+(int8|int16|int32|float|double)"
-					  "\\s*(\\(\\s*([+|-]?[0-9]+(\\.[0-9]+)?)\\s*\\))))\\s*(;.*)?$");
+	int			st = 0;
     std::smatch	m;
 	int			line_nbr = 0;
+    std::regex	regex("^\\s*([[:alpha:]]+)(\\s+([[:alnum:]]+)\\s*"
+					  "\\(\\s*([+|-]?[0-9]+(\\.[0-9]+)?)\\s*\\))?\\s*(;.*)?$");
+
     for (const auto &line : _lines) {
 		line_nbr++;
 		if (_exit)
@@ -158,20 +220,22 @@ int		AVM::run( void ) {
 		if (!std::regex_match(line, std::regex("^\\s*(;.*)?")))
 		{
 			try {
-				if (std::regex_match(line, m, regex)) {
-					if (m[3] != "")
-						exec_line(m[4].str(), m[5].str(), m[7].str());
-					else
-						exec_line(m[2].str());
-				}
+				if (std::regex_match(line, m, regex))
+					exec_line(m[1].str(), m[3].str(), m[4].str());
 				else throw std::invalid_argument ("Syntax error!");
 			}
-			catch (std::exception & e) { std::cerr << "AVM: Line " << line_nbr << ": "
-												   << e.what() << std::endl; }
+			catch (std::exception & e) {
+				st = 1;
+				std::cerr << "AVM: Line " << line_nbr << ": "
+						  << e.what() << std::endl;
+			}
 		}
 	}
-	return 1;
+	if (!_exit) throw std::logic_error("No exit statement!");
+	return (st);
 }
 
 AVM::~AVM() {
+	for (const auto & op : _stack)
+		delete op;
 }

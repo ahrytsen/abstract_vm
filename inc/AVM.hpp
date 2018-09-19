@@ -6,18 +6,21 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:48:23 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/17 20:22:01 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/19 18:40:17 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #ifndef AVM_HPP
 # define AVM_HPP
 
+# include <algorithm>
+# include <memory>
+# include <unistd.h>
 # include <iostream>
 # include <fstream>
 # include <string>
 # include <vector>
-# include <map>
+# include <unordered_map>
 # include <regex>
 # include <IOperand.hpp>
 # include <TOperand.hpp>
@@ -25,16 +28,21 @@
 
 class	AVM
 {
-	typedef std::map< std::string, void (AVM::*)() >		cmdMap;
-	typedef std::map< std::string, eOperandType >	tpMap;
+	typedef std::unordered_map< std::string, void (AVM::*)(void) >	smpl_cmdMap;
+	typedef std::unordered_map< std::string,
+								void (AVM::*)(eOperandType, std::string) >	arg_cmdMap;
+	typedef std::unordered_map< std::string, eOperandType >			tpMap;
 	std::vector< std::string >						_lines;
 	std::vector< IOperand const * >					_stack;
 	static const OFactory &							_factory;
-	static const cmdMap								_cmdmap;
+	static const smpl_cmdMap						_smpl_cmdmap;
+	static const arg_cmdMap							_arg_cmdmap;
 	static const tpMap								_typemap;
+	bool											_from_tty;
 	bool											_exit;
 
-	static const cmdMap	init_cmdmap(void);
+	static const smpl_cmdMap	init_smpl_cmdmap(void);
+	static const arg_cmdMap		init_arg_cmdmap(void);
 	static const tpMap	init_typemap(void);
 	static eOperandType	parse_type(std::string type);
 
@@ -47,9 +55,9 @@ class	AVM
 	void				div(void);
 	void				mod(void);
 	void				print(void);
+	void				ft_exit(void);
 	void				push(eOperandType type, std::string value);
-	void				assert(eOperandType type, std::string value);
-	void				exec_line(std::string cmd);
+	void				ft_assert(eOperandType type, std::string value);
 	void				exec_line(std::string cmd, std::string type, std::string value);
 public:
 	AVM( void );
