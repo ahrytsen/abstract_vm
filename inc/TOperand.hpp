@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:19:05 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 16:40:13 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 20:12:22 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -64,8 +64,10 @@ template <class T>
 TOperand<T>::TOperand(eOperandType type, size_t precision, T value)
 	: _value(value), _precision(precision), _type(type) {
 	std::stringstream	tmp;
+	tmp.setf( std::ios::fixed, std::ios::floatfield );
 	tmp.precision(_precision);
-	tmp << value;
+	if (_type == Int8) tmp << static_cast<int>(value);
+	else tmp << value;
 	_str_val = tmp.str();
 }
 

@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:48:23 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 16:29:26 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 19:10:17 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,6 +16,7 @@
 # include <algorithm>
 # include <memory>
 # include <unistd.h>
+# include <sys/stat.h>
 # include <iostream>
 # include <fstream>
 # include <string>
@@ -27,6 +28,7 @@
 # include <OFactory.hpp>
 
 bool	operator==(IOperand const & op1, IOperand const & op2 );
+bool	operator!=(IOperand const & op1, IOperand const & op2 );
 
 class	AVM
 {
@@ -40,7 +42,6 @@ class	AVM
 	static const smpl_cmdMap						_smpl_cmdmap;
 	static const arg_cmdMap							_arg_cmdmap;
 	static const tpMap								_typemap;
-	bool											_from_tty;
 	bool											_exit;
 
 	static const smpl_cmdMap	init_smpl_cmdmap(void);
@@ -66,6 +67,16 @@ public:
 	AVM( std::string file_path );
 	int					run( void );
 	~AVM( void );
+	class FatalErrorException : public std::exception {
+		std::string	_what;
+	public:
+		FatalErrorException( void );
+		FatalErrorException( std::string what );
+		FatalErrorException( FatalErrorException const & e );
+		virtual ~FatalErrorException( void ) throw();
+		FatalErrorException&	operator=( FatalErrorException const & e );
+		virtual const char* what() const throw();
+	};
 };
 
 #endif

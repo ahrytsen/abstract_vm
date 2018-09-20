@@ -6,19 +6,19 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/27 03:18:45 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/19 17:52:57 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 19:20:25 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <AVM.hpp>
 #include <IOperand.hpp>
 #include <TOperand.hpp>
+#include <stdlib.h>
 
 int		main(int ac, char **av)
 {
 	int		st;
-	AVM	*	abstract_vm;
-
+	AVM	*	abstract_vm = NULL;
 	if (ac < 2)
 	{
 		try {
@@ -26,7 +26,7 @@ int		main(int ac, char **av)
 			st = abstract_vm->run();
 		}
 		catch (std::exception & e) {
-			std::cout << "AVM: Fatal error: " << e.what() << std::endl;
+			std::cout << "AVM: " << e.what() << std::endl;
 			st = 1;
 		}
 		delete abstract_vm;
@@ -38,10 +38,11 @@ int		main(int ac, char **av)
 			st = abstract_vm->run();
 		}
 		catch (std::exception & e) {
-			std::cout << "AVM: Fatal error: " << e.what() << std::endl;
+			std::cout << "AVM(" << av[i] << "): " << e.what() << std::endl;
 			st = 1;
 		}
 		delete abstract_vm;
 	}
+	system("leaks -quiet avm");
 	return (st);
 }

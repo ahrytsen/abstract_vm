@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/12 17:00:56 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 16:43:14 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 19:44:11 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,6 +27,10 @@ bool			operator==(IOperand const & op1, IOperand const & op2 ) {
 			== getIOperandValue< double >(op2);
 	default: return false;
 	}
+}
+
+bool			operator!=(IOperand const & op1, IOperand const & op2 ) {
+	return (!(op1 == op2));
 }
 
 const OFactory &		AVM::_factory = OFactory::getInstance();
@@ -76,12 +80,11 @@ eOperandType			AVM::parse_type(std::string type) {
 }
 
 void					AVM::readlines(std::istream & input) {
-	int			line_nbr = 0;
 	std::string	tmp;
 
-	while (input.good() && !input.eof())
+	while (!input.eof())
 	{
-		if (_from_tty) std::cout << ++line_nbr << ": ";
+		if (!input.good()) throw FatalErrorException("Read Failure!");
 		std::getline(input, tmp);
 		if (std::regex_match(tmp, std::regex("^\\s*;;.*$")))
 			break ;
@@ -98,8 +101,8 @@ void	AVM::pop(void) {
 }
 
 void	AVM::dump(void) {
-    for (const auto & op : _stack)
-		std::cout << op->toString() << std::endl;
+    for (auto it = _stack.rbegin(); it != _stack.rend(); it++)
+		std::cout << (*it)->toString() << std::endl;
 }
 
 void	AVM::add(void) {
@@ -184,7 +187,7 @@ void	AVM::ft_assert(eOperandType type, std::string value) {
 		else except++;
 		tmp << "Precision differ!";
 	}
-	if (!(*peak == *ass))
+	if (*peak != *ass)
 	{
 		if (except) tmp << ", ";
 		else except++;
@@ -206,8 +209,6 @@ void	AVM::exec_line(std::string cmd, std::string type, std::string value)
 	void	(AVM::*arg_cmd)(eOperandType, std::string) =
 		(arg_got != _arg_cmdmap.end() ? arg_got->second : nullptr);
 
-	if (cmd == "push") return push(parse_type(type), value);
-
 	if (!smpl_cmd && !arg_cmd)
 		throw std::invalid_argument(std::string("Unknown instruction: ``")
 									 + cmd + "\"!");
@@ -221,14 +222,20 @@ void	AVM::exec_line(std::string cmd, std::string type, std::string value)
 	else (this->*arg_cmd)(parse_type(type), value);
 }
 
-AVM::AVM() : _from_tty(isatty(fileno(stdin))), _exit(false) {
+AVM::AVM() : _exit(false) {
 	readlines(std::cin);
 }
 
-AVM::AVM( std::string file_path ) : _from_tty(false), _exit(false) {
+AVM::AVM( std::string file_path ) : _exit(false) {
 	std::filebuf	file;
-	if (file.open(file_path, std::ios::in))
-	{
+	struct stat		st;
+
+	if (access(file_path.c_str(), F_OK)) throw FatalErrorException("No such file!");
+	else if (access(file_path.c_str(), R_OK)) throw FatalErrorException("Permission denied!");
+	else if (stat(file_path.c_str(), &st)) throw FatalErrorException("Can't recognize file type!");
+	else if (!S_ISREG(st.st_mode)) throw FatalErrorException("Not a regular file type!");
+	else if (!file.open(file_path, std::ios::in)) throw FatalErrorException("Can't open source file!");
+	else {
 		std::istream in(&file);
 		readlines(in);
 	}
@@ -267,4 +274,24 @@ int		AVM::run( void ) {
 AVM::~AVM() {
 	for (const auto & op : _stack)
 		delete op;
+}
+
+AVM::FatalErrorException::FatalErrorException( void ) : _what("Fatal Error!") {}
+
+AVM::FatalErrorException::FatalErrorException( std::string what )
+	: _what(std::string("Fatal Error: ") + what) {}
+
+AVM::FatalErrorException::FatalErrorException(
+	AVM::FatalErrorException::FatalErrorException const & e ) : _what(e._what) {}
+
+AVM::FatalErrorException::~FatalErrorException( void ) throw() {}
+
+AVM::FatalErrorException &
+AVM::FatalErrorException::operator=( FatalErrorException const & e ) {
+	_what = e._what;
+	return *this;
+}
+
+const char* AVM::FatalErrorException::what() const throw() {
+	return _what.c_str();
 }

@@ -1,0 +1,127 @@
+push int8(114) ; 'r'
+push int8(105) ; 'i'
+push int8(110) ; 'n'
+push int8(104) ; 'h'
+push int8(115) ; 's'
+push int8(117) ; 'u'
+push int8(107) ; 'k'
+push int8(115) ; 's'
+push int8(32) ; ' '
+push int8(45) ; '-'
+push int8(32) ; ' '
+push int8(121) ; 'y'
+push int8(114) ; 'r'
+push int8(111) ; 'o'
+push int8(116) ; 't'
+push int8(99) ; 'c'
+push int8(97) ; 'a'
+push int8(70) ; 'F'
+push int8(32) ; ' '
+push int8(84) ; 'T'
+push int8(73) ; 'I'
+push int8(78) ; 'N'
+push int8(85) ; 'U'
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+print
+pop
+
+push int32(2147483648)
+push int32(-2147483649)
+
+push int16(32768)
+push int16(-32770)
+
+push int8(-129)
+push int8(129)
+
+push float(214748362147483621474836214748362147483621474836)
+push float(-214748362147483621474836214748362147483621474836)
+
+push double(214748362147483621474836214748362147483621474836)
+push double(214748362147483621474836214748362147483621474836)
+push double(-214748362147483621474836214748362147483621474836)
+
+push int8(127.2)
+push int16(lol)
+push int32(123.2)
+
+push int32(32)
+push int32(22)
+assert int32(22)
+add
+
+push int16(32)
+push int8(22)
+sub
+
+push int8(120)
+push int8(-117)
+sub
+
+push double(-1003.12834)
+push float(-2003.12834)
+assert float(-2003.12834)
+
+push float(6.3)
+push float(2)
+div
+
+push float(6.444)
+push float(2)
+mul
+
+push float(6.444)
+push float(2)
+mod
+push double(6.444)
+push double(2)
+mod
+push int32(2)
+push int32(6)
+mod
+
+dump
+exit
