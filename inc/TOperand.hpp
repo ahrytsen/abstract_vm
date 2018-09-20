@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:19:05 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/19 21:44:41 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 16:40:13 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 # define TOPERAND_HPP
 
 # include <iostream>
+# include <sstream>
 # include <IOperand.hpp>
 # include <OFactory.hpp>
 
@@ -26,7 +27,7 @@ class	TOperand : public IOperand {
 	static const OFactory &	_factory;
 public:
 	TOperand<T>();
-	TOperand<T>(T value, eOperandType type);
+	TOperand<T>(eOperandType type, size_t precision, T value);
 	T					getValue( void ) const;			// Value of the type of the instance
 	int					getPrecision( void ) const;		// Precision of the type of the instance
 	eOperandType		getType( void ) const;			// Type of the instance
@@ -35,18 +36,21 @@ public:
 	IOperand const *	operator*( IOperand const & rhs ) const; // Product
 	IOperand const *	operator/( IOperand const & rhs ) const; // Quotient rhs
 	IOperand const *	operator%( IOperand const & rhs ) const; // Modulo
-	bool				operator==( IOperand const & rhs ) const; // Cmp
 	std::string const &	toString( void ) const; // String representation of the instance
-	template <typename S>
-	static S			getIOperandValue(IOperand const & op);
 
 	virtual ~TOperand( void ) {};
 };
 
-template<class T>
-std::ostream &	operator<<( std::ostream & out, TOperand<T> const & op ) {
-	out << op._value;
-	return (out);
+template <typename S>
+S						getIOperandValue(IOperand const & op)
+{
+	switch(op.getType()) {
+	case Int8: return dynamic_cast< TOperand< int8_t > const & >(op).getValue();
+	case Int16: return dynamic_cast< TOperand< int16_t > const & >(op).getValue();
+	case Int32: return dynamic_cast< TOperand< int32_t > const & >(op).getValue();
+	case _Float: return dynamic_cast< TOperand< float > const & >(op).getValue();
+	case _Double: return dynamic_cast< TOperand< double > const & >(op).getValue();
+	}
 }
 
 template<class T>
@@ -57,8 +61,13 @@ TOperand<T>::TOperand()
 	: _value(static_cast<int8_t>(0)), _precision(0), _type(Int8), _str_val("0") {}
 
 template <class T>
-TOperand<T>::TOperand(T value, eOperandType type)
-	: _value(value), _precision(sizeof(T)), _type(type), _str_val(std::to_string(value)) {}
+TOperand<T>::TOperand(eOperandType type, size_t precision, T value)
+	: _value(value), _precision(precision), _type(type) {
+	std::stringstream	tmp;
+	tmp.precision(_precision);
+	tmp << value;
+	_str_val = tmp.str();
+}
 
 template <class T>
 int						TOperand<T>::getPrecision( void ) const {return _precision;}
@@ -71,245 +80,126 @@ eOperandType			TOperand<T>::getType( void ) const {return _type;}
 
 template <class T>
 IOperand const *		TOperand<T>::operator+( IOperand const & rhs ) const {
-	switch (rhs.getType())
+	size_t			max_precision = std::max(_precision, rhs.getPrecision());
+	eOperandType	max_type = std::max(_type, rhs.getType());
+	switch (max_type)
 	{
 	case Int8:
-	{
-		T res = this->getValue() + dynamic_cast< const TOperand< int8_t > & >(rhs).getValue();
-		return (_factory.createTOperand(std::max(_type, rhs.getType()), res));
-	}
+		return _factory.createTOperand< int8_t >
+			(max_type, max_precision, this->getValue() + getIOperandValue< int8_t >(rhs));
 	case Int16:
-		if (_type > Int16) {
-			T res = this->getValue() + dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			int16_t	res = this->getValue() +
-				dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< int16_t >
+			(max_type, max_precision, this->getValue() + getIOperandValue< int16_t >(rhs));
 	case Int32:
-		if (_type > Int32) {
-			T res = this->getValue() + dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			int32_t	res = this->getValue() +
-				dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< int32_t >
+			(max_type, max_precision, this->getValue() + getIOperandValue< int32_t >(rhs));
 	case _Float:
-		if (_type > _Float) {
-			T res = this->getValue() + dynamic_cast< const TOperand< float > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			float	res = this->getValue() +
-				dynamic_cast< const TOperand< float > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< float >
+			(max_type, max_precision, this->getValue() + getIOperandValue< float >(rhs));
 	case _Double:
-	{
-		double	res = this->getValue() + dynamic_cast< const TOperand< double > & >(rhs).getValue();
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-	}
+		return _factory.createTOperand< double >
+			(max_type, max_precision, this->getValue() + getIOperandValue< double >(rhs));
 	}
 }
 
 template<class T>
 IOperand const *		TOperand<T>::operator-( IOperand const & rhs ) const {
-	switch (rhs.getType())
+	size_t			max_precision = std::max(_precision, rhs.getPrecision());
+	eOperandType	max_type = std::max(_type, rhs.getType());
+	switch (max_type)
 	{
 	case Int8:
-	{
-		T res = this->getValue() - dynamic_cast< const TOperand< int8_t > & >(rhs).getValue();
-		return (_factory.createTOperand(std::max(_type, rhs.getType()), res));
-	}
+		return _factory.createTOperand< int8_t >
+			(max_type, max_precision, this->getValue() - getIOperandValue< int8_t >(rhs));
 	case Int16:
-		if (_type > Int16) {
-			T res = this->getValue() - dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			int16_t	res = this->getValue() -
-				dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< int16_t >
+			(max_type, max_precision, this->getValue() - getIOperandValue< int16_t >(rhs));
 	case Int32:
-		if (_type > Int32) {
-			T res = this->getValue() - dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			int32_t	res = this->getValue() -
-				dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< int32_t >
+			(max_type, max_precision, this->getValue() - getIOperandValue< int32_t >(rhs));
 	case _Float:
-		if (_type > _Float) {
-			T res = this->getValue() - dynamic_cast< const TOperand< float > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			float	res = this->getValue() -
-				dynamic_cast< const TOperand< float > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< float >
+			(max_type, max_precision, this->getValue() - getIOperandValue< float >(rhs));
 	case _Double:
-	{
-		double	res = this->getValue() - dynamic_cast< const TOperand< double > & >(rhs).getValue();
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-	}
+		return _factory.createTOperand< double >
+			(max_type, max_precision, this->getValue() - getIOperandValue< double >(rhs));
 	}
 }
 
 template <class T>
 IOperand const *		TOperand<T>::operator*( IOperand const & rhs ) const {
-	switch (rhs.getType())
+	size_t			max_precision = std::max(_precision, rhs.getPrecision());
+	eOperandType	max_type = std::max(_type, rhs.getType());
+	switch (max_type)
 	{
 	case Int8:
-	{
-		T res = this->getValue() * dynamic_cast< const TOperand< int8_t > & >(rhs).getValue();
-		return (_factory.createTOperand(std::max(_type, rhs.getType()), res));
-	}
+		return _factory.createTOperand< int8_t >
+			(max_type, max_precision, this->getValue() * getIOperandValue< int8_t >(rhs));
 	case Int16:
-		if (_type > Int16) {
-			T res = this->getValue() * dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			int16_t	res = this->getValue() *
-				dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< int16_t >
+			(max_type, max_precision, this->getValue() * getIOperandValue< int16_t >(rhs));
 	case Int32:
-		if (_type > Int32) {
-			T res = this->getValue() * dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			int32_t	res = this->getValue() *
-				dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< int32_t >
+			(max_type, max_precision, this->getValue() * getIOperandValue< int32_t >(rhs));
 	case _Float:
-		if (_type > _Float) {
-			T res = this->getValue() * dynamic_cast< const TOperand< float > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
-		else {
-			float	res = this->getValue() *
-				dynamic_cast< const TOperand< float > & >(rhs).getValue();
-			return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-		}
+		return _factory.createTOperand< float >
+			(max_type, max_precision, this->getValue() * getIOperandValue< float >(rhs));
 	case _Double:
-	{
-		double	res = this->getValue() * dynamic_cast< const TOperand< double > & >(rhs).getValue();
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),res));
-	}
+		return _factory.createTOperand< double >
+			(max_type, max_precision, this->getValue() * getIOperandValue< double >(rhs));
 	}
 }
 
 template <class T>
 IOperand const *		TOperand<T>::operator/( IOperand const & rhs ) const {
-	switch (rhs.getType())
+	size_t			max_precision = std::max(_precision, rhs.getPrecision());
+	eOperandType	max_type = std::max(_type, rhs.getType());
+	if (getIOperandValue< double >(rhs) == 0.0)
+		throw std::logic_error ("Division by zero!");
+	switch (max_type)
 	{
 	case Int8:
-	{
-		int8_t rhs_val = dynamic_cast< const TOperand< int8_t > & >(rhs).getValue();
-		if (!rhs_val)
-			throw std::overflow_error ("Division by zero!");
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),
-										static_cast<T>(this->getValue() / rhs_val)));
-	}
+		return _factory.createTOperand< int8_t >
+			(max_type, max_precision, this->getValue() / getIOperandValue< int8_t >(rhs));
 	case Int16:
-	{
-		int16_t rhs_val = dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-		if (!rhs_val)
-			throw std::overflow_error ("Division by zero!");
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),
-										(_type > Int16)
-										? static_cast<T>(this->getValue() / rhs_val)
-										: static_cast<int16_t>(this->getValue() / rhs_val)));
-	}
+		return _factory.createTOperand< int16_t >
+			(max_type, max_precision, this->getValue() / getIOperandValue< int16_t >(rhs));
 	case Int32:
-	{
-		int32_t rhs_val = dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-		if (!rhs_val)
-			throw std::overflow_error ("Division by zero!");
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),
-										(_type > Int32)
-										? static_cast<T>(this->getValue() / rhs_val)
-										: static_cast<int32_t>(this->getValue() / rhs_val)));
-	}
+		return _factory.createTOperand< int32_t >
+			(max_type, max_precision, this->getValue() / getIOperandValue< int32_t >(rhs));
 	case _Float:
-	{
-		float rhs_val = dynamic_cast< const TOperand< float > & >(rhs).getValue();
-		if (rhs_val == 0.0)
-			throw std::overflow_error ("Division by zero!");
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),
-										(_type > _Float)
-										? static_cast<T>(this->getValue() / rhs_val)
-										: static_cast<float>(this->getValue() / rhs_val)));
-	}
+		return _factory.createTOperand< float >
+			(max_type, max_precision, this->getValue() / getIOperandValue< float >(rhs));
 	case _Double:
-	{
-		double rhs_val = dynamic_cast< const TOperand< double > & >(rhs).getValue();
-		if (rhs_val == 0.0)
-			throw std::overflow_error ("Division by zero!");
-		return (_factory.createTOperand(std::max(_type, rhs.getType()),
-										static_cast<double>(this->getValue() / rhs_val)));
-	}
+		return _factory.createTOperand< double >
+			(max_type, max_precision, this->getValue() / getIOperandValue< double >(rhs));
 	}
 }
 
 template <class T>
 IOperand const *		TOperand<T>::operator%( IOperand const & rhs ) const {
-	eOperandType	type = std::max(_type, rhs.getType());
-	if (type > Int32)
-		throw std::logic_error("Modulo of float type");
-	int32_t	lhs_val = this->getValue();
-	switch (rhs.getType())
+	size_t			max_precision = std::max(_precision, rhs.getPrecision());
+	eOperandType	max_type = std::max(_type, rhs.getType());
+	int32_t			value = this->getValue();
+	if (getIOperandValue< double >(rhs) == 0.0)
+		throw std::logic_error ("Modulo by zero!");
+	switch (max_type)
 	{
 	case Int8:
-	{
-		int8_t rhs_val = dynamic_cast< const TOperand< int8_t > & >(rhs).getValue();
-		if (!rhs_val)
-			throw std::overflow_error ("Modulo by zero!");
-		return (_factory.createTOperand(type, static_cast<T>(lhs_val % rhs_val)));
-	}
+		return _factory.createTOperand< int8_t >
+			(max_type, max_precision, value % getIOperandValue< int8_t >(rhs));
 	case Int16:
-	{
-		int16_t rhs_val = dynamic_cast< const TOperand< int16_t > & >(rhs).getValue();
-		if (!rhs_val)
-			throw std::overflow_error ("Modulo by zero!");
-		return (_factory.createTOperand(type,
-										(_type > Int16)
-										? static_cast<T>(lhs_val % rhs_val)
-										: static_cast<int16_t>(lhs_val % rhs_val)));
-	}
+		return _factory.createTOperand< int16_t >
+			(max_type, max_precision, value % getIOperandValue< int16_t >(rhs));
 	case Int32:
-	{
-		int32_t rhs_val = dynamic_cast< const TOperand< int32_t > & >(rhs).getValue();
-		if (!rhs_val)
-			throw std::overflow_error ("Modulo by zero!");
-		return (_factory.createTOperand(type, static_cast<int32_t>(lhs_val % rhs_val)));
-	}
+		return _factory.createTOperand< int32_t >
+			(max_type, max_precision, value % getIOperandValue< int32_t >(rhs));
 	case _Float:
 	case _Double:
 	default:
 		throw std::logic_error("Modulo of float type");
 		return (NULL);
 	}
-}
-
-template <class T>
-bool					TOperand<T>::operator==( IOperand const & rhs ) const {
-	if (rhs.getType() != _type
-		|| rhs.getPrecision() != _precision
-		|| _value != dynamic_cast< TOperand< T > const & >(rhs).getValue())
-		return (false);
-	return (true);
 }
 
 template <class T>

@@ -6,11 +6,28 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/12 17:00:56 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/19 21:07:43 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 16:43:14 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <AVM.hpp>
+
+bool			operator==(IOperand const & op1, IOperand const & op2 ) {
+	eOperandType	max_type = std::max(op1.getType(), op2.getType());
+	switch(max_type) {
+	case Int8: return getIOperandValue< int8_t >(op1)
+			== getIOperandValue< int8_t >(op2);
+	case Int16: return getIOperandValue< int16_t >(op1)
+			== getIOperandValue< int16_t >(op2);
+	case Int32: return getIOperandValue< int32_t >(op1)
+			== getIOperandValue< int32_t >(op2);
+	case _Float: return getIOperandValue< float >(op1)
+			== getIOperandValue< float >(op2);
+	case _Double: return getIOperandValue< double >(op1)
+			== getIOperandValue< double >(op2);
+	default: return false;
+	}
+}
 
 const OFactory &		AVM::_factory = OFactory::getInstance();
 const AVM::smpl_cmdMap	AVM::_smpl_cmdmap = AVM::init_smpl_cmdmap();
@@ -152,16 +169,28 @@ void	AVM::push(eOperandType type, std::string value) {
 }
 
 void	AVM::ft_assert(eOperandType type, std::string value) {
+	int									except = 0;
+	std::stringstream					tmp;
 	std::unique_ptr< const IOperand >	ass(_factory.createOperand(type, value));
 	if (_stack.empty())
 		throw std::logic_error("assert: Empty stack!");
 	auto 								peak = _stack.back();
-	if (type != peak->getType())
-		throw std::logic_error("assert: Types differ!");
-	else if (ass->getPrecision() != peak->getPrecision())
-		throw std::logic_error("assert: Precision differ!");
-	else if (!(*peak == *ass))
-		throw std::logic_error("assert: Value differ!");
+	tmp << "assert: ";
+	if (ass->getType() != peak->getType())
+		tmp << "Types differ!";
+	if (ass->getPrecision() != peak->getPrecision())
+	{
+		if (except) tmp << ", ";
+		else except++;
+		tmp << "Precision differ!";
+	}
+	if (!(*peak == *ass))
+	{
+		if (except) tmp << ", ";
+		else except++;
+		tmp << "Value differ!";
+	}
+	if (except) throw std::logic_error(tmp.str());
 }
 
 void	AVM::exec_line(std::string cmd, std::string type, std::string value)

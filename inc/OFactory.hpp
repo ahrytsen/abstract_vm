@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/11 14:50:37 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/19 19:13:19 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 16:08:28 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,9 +18,8 @@
 # include <regex>
 # include <IOperand.hpp>
 
-class OFactory;
-
-typedef IOperand const * (OFactory::*farr)( std::string const & ) const;
+template<class T>
+class TOperand;
 
 class	OFactory {
 	static OFactory	_instance;
@@ -37,11 +36,12 @@ class	OFactory {
 public:
 	static const OFactory &	getInstance();
 	IOperand const *	createOperand( eOperandType type, std::string const & value ) const;
-	IOperand const *	createTOperand( eOperandType type, int8_t value ) const;
-	IOperand const *	createTOperand( eOperandType type, int16_t value ) const;
-	IOperand const *	createTOperand( eOperandType type, int32_t value ) const;
-	IOperand const *	createTOperand( eOperandType type, float value ) const;
-	IOperand const *	createTOperand( eOperandType type, double value ) const;
+	template<typename T>
+	IOperand const *	createTOperand( eOperandType type, size_t precision, T value ) const{
+		return (new TOperand<T>(type, precision, value));
+	}
 };
+
+typedef IOperand const * (OFactory::*farr)( std::string const & ) const;
 
 #endif

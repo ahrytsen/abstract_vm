@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:48:23 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/19 18:40:17 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 16:29:26 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,8 @@
 # include <IOperand.hpp>
 # include <TOperand.hpp>
 # include <OFactory.hpp>
+
+bool	operator==(IOperand const & op1, IOperand const & op2 );
 
 class	AVM
 {

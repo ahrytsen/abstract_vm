@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/26 17:10:16 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/19 20:21:21 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/20 16:09:15 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -32,7 +32,6 @@ public:
 	virtual IOperand const *	operator*( IOperand const & rhs ) const = 0; // Product
 	virtual IOperand const *	operator/( IOperand const & rhs ) const = 0; // Quotient rhs
 	virtual IOperand const *	operator%( IOperand const & rhs ) const = 0; // Modulo
-	virtual bool				operator==( IOperand const & rhs ) const = 0; // CMP
 	virtual std::string const & toString( void ) const = 0; // String representation of the instance
 
 	virtual ~IOperand( void ) {}
