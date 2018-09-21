@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/12 17:00:56 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 19:44:11 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/21 14:26:56 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -159,7 +159,7 @@ void	AVM::print(void) {
 	if (_stack.empty())
 		throw std::logic_error("print: Empty stack!");
 	if (_stack.back()->getType() != Int8)
-		throw std::logic_error("print: Can`t print operand of non int8 type!");
+		throw std::logic_error("print: Can't print operand of non int8 type!");
 	std::cout << dynamic_cast< const TOperand< int8_t > & >(*_stack.back()).getValue();
 }
 
@@ -180,7 +180,11 @@ void	AVM::ft_assert(eOperandType type, std::string value) {
 	auto 								peak = _stack.back();
 	tmp << "assert: ";
 	if (ass->getType() != peak->getType())
+	{
+		if (except) tmp << ", ";
+		else except++;
 		tmp << "Types differ!";
+	}
 	if (ass->getPrecision() != peak->getPrecision())
 	{
 		if (except) tmp << ", ";

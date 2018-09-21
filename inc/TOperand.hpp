@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/07/30 13:19:05 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 20:12:22 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/21 14:07:08 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -84,23 +84,15 @@ template <class T>
 IOperand const *		TOperand<T>::operator+( IOperand const & rhs ) const {
 	size_t			max_precision = std::max(_precision, rhs.getPrecision());
 	eOperandType	max_type = std::max(_type, rhs.getType());
-	switch (max_type)
-	{
-	case Int8:
-		return _factory.createTOperand< int8_t >
-			(max_type, max_precision, this->getValue() + getIOperandValue< int8_t >(rhs));
-	case Int16:
-		return _factory.createTOperand< int16_t >
-			(max_type, max_precision, this->getValue() + getIOperandValue< int16_t >(rhs));
-	case Int32:
-		return _factory.createTOperand< int32_t >
-			(max_type, max_precision, this->getValue() + getIOperandValue< int32_t >(rhs));
-	case _Float:
-		return _factory.createTOperand< float >
-			(max_type, max_precision, this->getValue() + getIOperandValue< float >(rhs));
-	case _Double:
-		return _factory.createTOperand< double >
-			(max_type, max_precision, this->getValue() + getIOperandValue< double >(rhs));
+	long			l_res;
+	long double		ld_res;
+	if (max_type < _Float) {
+		l_res = this->getValue() + getIOperandValue< long >(rhs);
+		return _factory.createTOperand(max_type, max_precision, l_res);
+	}
+	else {
+		ld_res = this->getValue() + getIOperandValue< long double >(rhs);
+		return _factory.createTOperand(max_type, max_precision, ld_res);
 	}
 }
 
@@ -108,23 +100,15 @@ template<class T>
 IOperand const *		TOperand<T>::operator-( IOperand const & rhs ) const {
 	size_t			max_precision = std::max(_precision, rhs.getPrecision());
 	eOperandType	max_type = std::max(_type, rhs.getType());
-	switch (max_type)
-	{
-	case Int8:
-		return _factory.createTOperand< int8_t >
-			(max_type, max_precision, this->getValue() - getIOperandValue< int8_t >(rhs));
-	case Int16:
-		return _factory.createTOperand< int16_t >
-			(max_type, max_precision, this->getValue() - getIOperandValue< int16_t >(rhs));
-	case Int32:
-		return _factory.createTOperand< int32_t >
-			(max_type, max_precision, this->getValue() - getIOperandValue< int32_t >(rhs));
-	case _Float:
-		return _factory.createTOperand< float >
-			(max_type, max_precision, this->getValue() - getIOperandValue< float >(rhs));
-	case _Double:
-		return _factory.createTOperand< double >
-			(max_type, max_precision, this->getValue() - getIOperandValue< double >(rhs));
+	long			l_res;
+	long double		ld_res;
+	if (max_type < _Float) {
+		l_res = this->getValue() - getIOperandValue< long >(rhs);
+		return _factory.createTOperand(max_type, max_precision, l_res);
+	}
+	else {
+		ld_res = this->getValue() - getIOperandValue< long double >(rhs);
+		return _factory.createTOperand(max_type, max_precision, ld_res);
 	}
 }
 
@@ -132,23 +116,15 @@ template <class T>
 IOperand const *		TOperand<T>::operator*( IOperand const & rhs ) const {
 	size_t			max_precision = std::max(_precision, rhs.getPrecision());
 	eOperandType	max_type = std::max(_type, rhs.getType());
-	switch (max_type)
-	{
-	case Int8:
-		return _factory.createTOperand< int8_t >
-			(max_type, max_precision, this->getValue() * getIOperandValue< int8_t >(rhs));
-	case Int16:
-		return _factory.createTOperand< int16_t >
-			(max_type, max_precision, this->getValue() * getIOperandValue< int16_t >(rhs));
-	case Int32:
-		return _factory.createTOperand< int32_t >
-			(max_type, max_precision, this->getValue() * getIOperandValue< int32_t >(rhs));
-	case _Float:
-		return _factory.createTOperand< float >
-			(max_type, max_precision, this->getValue() * getIOperandValue< float >(rhs));
-	case _Double:
-		return _factory.createTOperand< double >
-			(max_type, max_precision, this->getValue() * getIOperandValue< double >(rhs));
+	long			l_res;
+	long double		ld_res;
+	if (max_type < _Float) {
+		l_res = this->getValue() * getIOperandValue< long >(rhs);
+		return _factory.createTOperand(max_type, max_precision, l_res);
+	}
+	else {
+		ld_res = this->getValue() * getIOperandValue< long double >(rhs);
+		return _factory.createTOperand(max_type, max_precision, ld_res);
 	}
 }
 
@@ -156,25 +132,17 @@ template <class T>
 IOperand const *		TOperand<T>::operator/( IOperand const & rhs ) const {
 	size_t			max_precision = std::max(_precision, rhs.getPrecision());
 	eOperandType	max_type = std::max(_type, rhs.getType());
+	long			l_res;
+	long double		ld_res;
 	if (getIOperandValue< double >(rhs) == 0.0)
 		throw std::logic_error ("Division by zero!");
-	switch (max_type)
-	{
-	case Int8:
-		return _factory.createTOperand< int8_t >
-			(max_type, max_precision, this->getValue() / getIOperandValue< int8_t >(rhs));
-	case Int16:
-		return _factory.createTOperand< int16_t >
-			(max_type, max_precision, this->getValue() / getIOperandValue< int16_t >(rhs));
-	case Int32:
-		return _factory.createTOperand< int32_t >
-			(max_type, max_precision, this->getValue() / getIOperandValue< int32_t >(rhs));
-	case _Float:
-		return _factory.createTOperand< float >
-			(max_type, max_precision, this->getValue() / getIOperandValue< float >(rhs));
-	case _Double:
-		return _factory.createTOperand< double >
-			(max_type, max_precision, this->getValue() / getIOperandValue< double >(rhs));
+	else if (max_type < _Float) {
+		l_res = this->getValue() / getIOperandValue< long >(rhs);
+		return _factory.createTOperand(max_type, max_precision, l_res);
+	}
+	else {
+		ld_res = this->getValue() / getIOperandValue< long double >(rhs);
+		return _factory.createTOperand(max_type, max_precision, ld_res);
 	}
 }
 
@@ -183,25 +151,13 @@ IOperand const *		TOperand<T>::operator%( IOperand const & rhs ) const {
 	size_t			max_precision = std::max(_precision, rhs.getPrecision());
 	eOperandType	max_type = std::max(_type, rhs.getType());
 	int32_t			value = this->getValue();
+	long			res;
 	if (getIOperandValue< double >(rhs) == 0.0)
 		throw std::logic_error ("Modulo by zero!");
-	switch (max_type)
-	{
-	case Int8:
-		return _factory.createTOperand< int8_t >
-			(max_type, max_precision, value % getIOperandValue< int8_t >(rhs));
-	case Int16:
-		return _factory.createTOperand< int16_t >
-			(max_type, max_precision, value % getIOperandValue< int16_t >(rhs));
-	case Int32:
-		return _factory.createTOperand< int32_t >
-			(max_type, max_precision, value % getIOperandValue< int32_t >(rhs));
-	case _Float:
-	case _Double:
-	default:
-		throw std::logic_error("Modulo of float type");
-		return (NULL);
-	}
+	else if (max_type >= _Float)
+ 		throw std::logic_error("Modulo of float type");
+	res = value % getIOperandValue< long >(rhs);
+	return _factory.createTOperand(max_type, max_precision, res);
 }
 
 template <class T>

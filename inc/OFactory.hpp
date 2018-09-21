@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/11 14:50:37 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 20:46:37 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/21 14:19:15 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,6 +16,7 @@
 # include <iostream>
 # include <vector>
 # include <regex>
+# include <sstream>
 # include <IOperand.hpp>
 
 template<class T>
@@ -36,10 +37,8 @@ class	OFactory {
 public:
 	static const OFactory &	getInstance();
 	IOperand const *	createOperand( eOperandType type, std::string const & value ) const;
-	template<typename T>
-	IOperand const *	createTOperand( eOperandType type, size_t precision, T value ) const{
-		return (new TOperand<T>(type, precision, value));
-	}
+	IOperand const *	createTOperand( eOperandType type, size_t precision, long const & value ) const;
+	IOperand const *	createTOperand( eOperandType type, size_t precision, long double const & value ) const;
 };
 
 typedef IOperand const * (OFactory::*farr)( std::string const & ) const;

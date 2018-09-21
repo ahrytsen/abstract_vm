@@ -6,7 +6,7 @@
 //   By: ahrytsen <ahrytsen@student.unit.ua>        +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2018/09/11 15:38:27 by ahrytsen          #+#    #+#             //
-//   Updated: 2018/09/20 20:48:12 by ahrytsen         ###   ########.fr       //
+//   Updated: 2018/09/21 14:20:18 by ahrytsen         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -99,4 +99,60 @@ IOperand const *	OFactory::createOperand( eOperandType type, std::string const &
 	if (type < Int8 || type > _Double )
 		throw std::out_of_range ("Unknown operand type!");
 	return ((this->*funcs[type])(value));
+}
+
+IOperand const *	OFactory::createTOperand( eOperandType type, size_t precision, long const & value ) const {
+	std::stringstream	error;
+	switch(type) {
+	case Int8:
+		if (value < std::numeric_limits<int8_t>::min()
+			|| value > std::numeric_limits<int8_t>::max())
+		{
+			error << "Value ``" << value << "\" overflows int8!";
+			throw std::out_of_range(error.str());
+		}
+		return (new TOperand<int8_t>(type, precision, value));
+	case Int16:
+		if (value < std::numeric_limits<int16_t>::min()
+			|| value > std::numeric_limits<int16_t>::max())
+		{
+			error << "Value ``" << value << "\" overflows int16!";
+			throw std::out_of_range(error.str());
+		}
+		return (new TOperand<int16_t>(type, precision, value));
+	case Int32:
+		if (value < std::numeric_limits<int32_t>::min()
+			|| value > std::numeric_limits<int32_t>::max())
+		{
+			error << "Value ``" << value << "\" overflows int32!";
+			throw std::out_of_range(error.str());
+		}
+		return (new TOperand<int32_t>(type, precision, value));
+	default:
+		return nullptr;
+	}
+}
+
+IOperand const *	OFactory::createTOperand( eOperandType type, size_t precision, long double const & value ) const {
+	std::stringstream	error;
+	switch(type) {
+	case _Float:
+		if (value < std::numeric_limits<float>::min()
+			|| value > std::numeric_limits<float>::max())
+		{
+			error << "Value ``" << value << "\" overflows float!";
+			throw std::out_of_range(error.str());
+		}
+		return (new TOperand<float>(type, precision, value));
+	case _Double:
+		if (value < std::numeric_limits<double>::min()
+			|| value > std::numeric_limits<double>::max())
+		{
+			error << "Value ``" << value << "\" overflows double!";
+			throw std::out_of_range(error.str());
+		}
+		return (new TOperand<double>(type, precision, value));
+	default:
+		return nullptr;
+	}
 }
